@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Установка Max</title>
+
+<style>
+    body {
+        background: #f2f2f2;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .box {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        text-align: center;
+        width: 300px;
+    }
+    h1 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        background: #d9534f;
+        color: white;
+        cursor: pointer;
+        width: 100%;
+    }
+    button:hover {
+        background: #c9302c;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h1>Установка Max...</h1>
+    <p>Подготовка файлов</p>
+    <button id="cancelBtn">Отменить</button>
+</div>
+
+<audio id="sound" src="https://files.catbox.moe/9o6j3y.mp3"></audio>
+
+<script>
+    document.getElementById("cancelBtn").onclick = function() {
+        const audio = document.getElementById("sound");
+        audio.volume = 1.0;
+        audio.play();
+
+        document.body.style.animation = "shake 0.2s infinite";
+    };
+</script>
+
+<style>
+    @keyframes shake {
+        0% { transform: translate(2px, 0); }
+        50% { transform: translate(-2px, 0); }
+        100% { transform: translate(2px, 0); }
+    }
+</style>
+
+</body>
+</html>
