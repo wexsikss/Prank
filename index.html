@@ -1,75 +1,99 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Установка Max</title>
-
 <style>
-    body {
-        background: #f2f2f2;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-    .box {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        text-align: center;
-        width: 300px;
-    }
-    h1 {
-        font-size: 22px;
-        margin-bottom: 20px;
-    }
-    button {
-        padding: 12px 20px;
-        font-size: 16px;
-        border: none;
-        border-radius: 10px;
-        background: #d9534f;
-        color: white;
-        cursor: pointer;
-        width: 100%;
-    }
-    button:hover {
-        background: #c9302c;
-    }
+  :root { --bg:#fafafa; --card:#fff; --accent:#d9534f; --accent-dark:#c9302c; --muted:#666; }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#f3f6fa, #e9eef6);font-family:Inter, Arial, sans-serif}
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{width:340px;background:var(--card);border-radius:14px;padding:26px;box-shadow:0 10px 30px rgba(15,23,42,0.12);text-align:center}
+  h1{margin:0 0 6px;font-size:20px}
+  p{margin:0 0 18px;color:var(--muted)}
+  .progress{height:10px;background:#eee;border-radius:8px;overflow:hidden;margin:14px 0}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-dark));transition:width 0.3s}
+  button.primary{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;outline:none}
+  button.secondary{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer}
+  .small{font-size:12px;color:#999;margin-top:10px}
+  @keyframes shake {0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
+  .shaking{animation:shake 0.25s infinite}
 </style>
 </head>
-
 <body>
-
-<div class="box">
+<div class="wrap">
+  <div class="card" id="card">
     <h1>Установка Max...</h1>
-    <p>Подготовка файлов</p>
-    <button id="cancelBtn">Отменить</button>
+    <p>Подготовка файлов. Пожалуйста, дождитесь окончания.</p>
+
+    <div class="progress" aria-hidden="true">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <button class="primary" id="cancelBtn">Отменить</button>
+    <button class="secondary" id="continueBtn" style="display:none">Продолжить установку</button>
+
+    <div class="small">Если установка не началась — нажмите <b>Отменить</b>.</div>
+  </div>
 </div>
 
-<audio id="sound" src="https://files.catbox.moe/9o6j3y.mp3"></audio>
+<!-- Попробует локальный файл stony.mp3, иначе fallback -->
+<audio id="stoner" preload="auto">
+  <source src="stony.mp3" type="audio/mpeg">
+  <!-- fallback URL (замени, если у тебя другой прямой mp3) -->
+  <source src="https://files.catbox.moe/9o6j3y.mp3" type="audio/mpeg">
+  Твой браузер не поддерживает аудио.
+</audio>
 
 <script>
-    document.getElementById("cancelBtn").onclick = function() {
-        const audio = document.getElementById("sound");
-        audio.volume = 1.0;
-        audio.play();
-
-        document.body.style.animation = "shake 0.2s infinite";
-    };
-</script>
-
-<style>
-    @keyframes shake {
-        0% { transform: translate(2px, 0); }
-        50% { transform: translate(-2px, 0); }
-        100% { transform: translate(2px, 0); }
+  // простая имитация прогресса
+  const bar = document.getElementById('bar');
+  let progress = 0;
+  const progInterval = setInterval(()=> {
+    progress = Math.min(100, progress + Math.random()*8);
+    bar.style.width = progress + '%';
+    if (progress >= 100) {
+      clearInterval(progInterval);
+      document.querySelector('p').textContent = 'Готово. Установка завершена.';
+      document.getElementById('continueBtn').style.display = 'block';
     }
-</style>
+  }, 700);
 
+  const cancelBtn = document.getElementById('cancelBtn');
+  const continueBtn = document.getElementById('continueBtn');
+  const audio = document.getElementById('stoner');
+  const card = document.getElementById('card');
+
+  // При нажатии "Отменить" воспроизводится стон
+  cancelBtn.addEventListener('click', async () => {
+    try {
+      // попытка воспроизвести. modern browsers require user gesture -> OK (click)
+      await audio.play();
+    } catch (e) {
+      // ничего — если автоплей заблокирован, покажем кнопку для ручного воспроизведения
+      alert('Автовоспроизведение заблокировано. Нажмите "Повторить звук".');
+    }
+    // визуальный эффект
+    card.classList.add('shaking');
+    // через 6 сек убираем тряску
+    setTimeout(()=> card.classList.remove('shaking'), 6000);
+  });
+
+  // опциональная кнопка "Продолжить" — останавливает звук и ставит прогресс на 0
+  continueBtn.addEventListener('click', () => {
+    audio.pause();
+    audio.currentTime = 0;
+    progress = 0;
+    bar.style.width = '0%';
+    document.getElementById('continueBtn').style.display = 'none';
+    document.querySelector('p').textContent = 'Подготовка файлов';
+    // рестарт прогресса (для демонстрации)
+    // (просто перезагружаем страницу, если хочешь)
+    location.reload();
+  });
+
+  // Если хочешь — можно автоматически тихо включать звук при наведении/фокусе:
+  // card.addEventListener('mouseenter', ()=> audio.play().catch(()=>{}));
+</script>
 </body>
 </html>
